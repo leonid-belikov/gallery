@@ -80,27 +80,17 @@ class Menu {
             }
         };
 
-        this.filterActivated = false;
         this.filterBtn = document.querySelector('#filterBtn');
         this.filterBtn.onclick = function (event) {
             let target = event.target;
             let filterPopup = document.querySelector('.menu__filter-popup');
-            let title = document.querySelector('#filterBtn span');
-            if (!this.filterActivated) {
-                filterPopup.classList.remove('menu__filter-popup_hidden');
-                title.innerHTML = 'Фильтровать по типу';
-                if (target.classList.contains('menu__filter-item')) {
-                    let filterType = target.getAttribute('filter');
-                    document.dispatchEvent(new CustomEvent('filterBtn_activated', {
-                        'detail': {filterType}
-                    }));
-                    filterPopup.classList.add('menu__filter-popup_hidden');
-                    title.innerHTML = 'Показать все';
-                    this.filterActivated = true;
-                }
-            } else {
-                this.filterActivated = false;
-                title.innerHTML = 'Фильтровать по типу';
+            filterPopup.classList.remove('menu__filter-popup_hidden');
+            if (target.classList.contains('menu__filter-item')) {
+                let filterType = target.getAttribute('filter');
+                document.dispatchEvent(new CustomEvent('filterBtn_activated', {
+                    detail: {filterType}
+                }));
+                filterPopup.classList.add('menu__filter-popup_hidden');
             }
         };
     }
@@ -113,28 +103,50 @@ class Gallery {
         if (data instanceof Array && data.length > 0) {
             this.data = data;
             this.isSorted = false;
-            this.renderCards();
+            this.isFiltered = false;
+            this.renderCards(this.data);
         } else {
             this.gallery.innerText = "События не найдены";
         }
 
         document.addEventListener('sortBtn_activated', function () {
+            let data = self.isFiltered ? self.filteredData : self.data;
             if (self.isSorted) {
-                self.gallery.innerHTML = '';
-                self.renderCards();
+                self.renderCards(data);
             } else {
-                self.sortCardsByPrice();
+                self.sortCardsByPrice(data);
             }
             self.isSorted = !self.isSorted;
         });
 
         document.addEventListener('filterBtn_activated', function (event) {
-            console.log(event.detail);
+            let filterType = event.detail.filterType;
+            if (filterType === "all") {
+                let data = self.isSorted ? self.sortedData : self.data;
+                self.renderCards(data);
+                self.isFiltered = false;
+            } else if (filterType) {
+                self.filterCardsByType(filterType, self.isSorted);
+                self.isFiltered = true;
+            }
         });
     }
 
-    renderCards() {
-        for (let item of this.data) {
+    get sortedData() {
+        if (!this._sortedData) {
+            this._sortedData = this.data.slice();
+            Gallery.sortDataByPrice(this._sortedData);
+        }
+        return this._sortedData;
+    }
+
+    set sortedData(data) {
+        this._sortedData = data;
+    }
+
+    renderCards(data) {
+        this.gallery.innerHTML = '';
+        for (let item of data) {
             this.renderCard(item);
         }
     }
@@ -159,19 +171,35 @@ class Gallery {
         this.gallery.appendChild(card);
     }
 
-    sortCardsByPrice() {
-        if (this.sortedData === undefined) {
-            this.sortedData = this.data.slice();
-            this.sortedData.sort((item1, item2) => {
-                if (item1['price'] < item2['price'])
-                    return -1;
-                else
-                    return 1
-            });
+    sortCardsByPrice(data) {
+        if (this.isFiltered) {
+            let sortedData = data.slice();
+            Gallery.sortDataByPrice(sortedData);
+            this.renderCards(sortedData);
+        } else {
+            this.renderCards(this.sortedData);
         }
-        this.gallery.innerHTML = '';
-        for (let item of this.sortedData) {
-            this.renderCard(item);
+    }
+
+    static sortDataByPrice(data) {
+        data.sort((item1, item2) => {
+            if (item1['price'] < item2['price'])
+                return -1;
+            else
+                return 1
+        });
+    }
+
+    filterCardsByType(type, isSorted) {
+        this.filteredData = this.data.filter(function (item) {
+            return item['type'] === type;
+        });
+        if (isSorted) {
+            let resultData = this.filteredData.slice();
+            Gallery.sortDataByPrice(resultData);
+            this.renderCards(resultData);
+        } else {
+            this.renderCards(this.filteredData);
         }
     }
 
