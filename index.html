@@ -13,7 +13,14 @@
             </div>
             <ul class="menu">
                 <li class="menu__item" id="sortBtn">Сортировать по цене</li>
-                <li class="menu__item" id="filterBtn">Фильтровать</li>
+                <li class="menu__item" id="filterBtn"><span>Фильтровать по типу</span>
+                    <ul class="menu__filter-popup menu__filter-popup_hidden">
+                        <li class="menu__filter-item" filter="concert">Концерты</li>
+                        <li class="menu__filter-item" filter="sport">Спорт</li>
+                        <li class="menu__filter-item" filter="exhibition">Выставки</li>
+                        <li class="menu__filter-item" filter="festival">Фестивали</li>
+                    </ul>
+                </li>
                 <li class="menu__item" id="favoriteBtn">Избранное</li>
             </ul>
         </div>

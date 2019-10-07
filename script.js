@@ -67,6 +67,7 @@ const DATA = [
 class Menu {
     constructor() {
         let self = this;
+
         this.sortActivated = false;
         this.sortBtn = document.querySelector('#sortBtn');
         this.sortBtn.onclick = function() {
@@ -77,7 +78,31 @@ class Menu {
             } else {
                 self.sortBtn.innerText = 'Сортировать по цене';
             }
-        }
+        };
+
+        this.filterActivated = false;
+        this.filterBtn = document.querySelector('#filterBtn');
+        this.filterBtn.onclick = function (event) {
+            let target = event.target;
+            let filterPopup = document.querySelector('.menu__filter-popup');
+            let title = document.querySelector('#filterBtn span');
+            if (!this.filterActivated) {
+                filterPopup.classList.remove('menu__filter-popup_hidden');
+                title.innerHTML = 'Фильтровать по типу';
+                if (target.classList.contains('menu__filter-item')) {
+                    let filterType = target.getAttribute('filter');
+                    document.dispatchEvent(new CustomEvent('filterBtn_activated', {
+                        'detail': {filterType}
+                    }));
+                    filterPopup.classList.add('menu__filter-popup_hidden');
+                    title.innerHTML = 'Показать все';
+                    this.filterActivated = true;
+                }
+            } else {
+                this.filterActivated = false;
+                title.innerHTML = 'Фильтровать по типу';
+            }
+        };
     }
 }
 
@@ -101,6 +126,10 @@ class Gallery {
                 self.sortCardsByPrice();
             }
             self.isSorted = !self.isSorted;
+        });
+
+        document.addEventListener('filterBtn_activated', function (event) {
+            console.log(event.detail);
         });
     }
 
