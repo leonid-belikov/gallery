@@ -12,7 +12,7 @@
 }
 
 body {
-    background: linear-gradient(#bb7b7b, #ffffff);
+    background: linear-gradient(#ffffff, #ab6e6e);
     min-height: 100vh;
 }
 
@@ -103,6 +103,10 @@ header {
 
 .menu__filter-item:hover {
     background: #bb7b7b;
+}
+
+.menu__filter-item_selected {
+    background: #ccc;
 }
 
 /*Галерея*/
